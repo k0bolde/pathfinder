@@ -1,13 +1,98 @@
 <html>
+
 	<head>
+		<script src="http://code.jquery.com/jquery-2.1.0.js"></script>
 		<!-- This page is meant to be a pathfinder character sheet -->
+		<!-- By Jon Nielsen -->
 		<title>Pathfinder Character Sheet</title>
+		<style>
+			table {
+				/*float:left;*/
+				border-collapse:collapse;
+			}
+			table,th,td {
+				border:1px solid black;
+			}
+			td {
+				text-align:center;
+			}
+			th {
+				background-color:green;
+				color:white;
+			}
+		</style>
+		<script>
+			$(document).ready(function(){
+				//add localStorage loading here
+
+				//handles ability modifiers
+				$("#str").change(function(){
+					if($("#str").val() < 9){
+						//round up
+						$("#strmod").text(Math.ceil(($("#str").val()-10)/2));
+					}else{
+						//round down
+						$("#strmod").text("+"+Math.floor(($("#str").val()-10)/2));
+					}
+
+					//set str mod on other stats
+					$("#fortstr").text($("#strmod").text());
+
+					//update fort save
+					updateFort();
+				});
+
+				$("#dex").change(function(){
+					if($("#dex").val() < 9){
+						$("#dexmod").text(Math.ceil(($("#dex").val()-10)/2));
+					}else{
+						$("#dexmod").text("+"+Math.floor(($("#dex").val()-10)/2));
+					}
+					//set the dex modifiers on other stats
+					$("#initdex").text($("#dexmod").text());
+					$("#reflexdex").text($("#dexmod").text());
+					$("#acdex").text($("#dexmod").text());
+
+					//update the initiative total
+					updateInit();
+
+					//update AC total
+					//update reflex total
+				});
+
+				//update initiative if misc modifier is changed
+				$("#initmisc").change(function(){
+					updateInit();	
+				});
+
+				//update saves if their misc is changed
+				$("#fortmisc").change(function(){
+					updateFort();
+				});
+
+
+				//call all change methods to update the blank sheet so page refreshes don't kill it
+				$("#str").change();
+				$("#dex").change();
+				$("#initmisc").change();
+			});
+
+			//Updates the total initiative 
+			function updateInit(){
+				$("#init").text(Number($("#initdex").text())+Number($("#initmisc").val()));
+			}
+
+			//updates fort save
+			function updateFort(){
+				$("#forttot").text(Number($("#fortstr").text())+Number($("#fortbase").text())+Number($("#fortmisc").val()));
+			}
+		</script>
 	</head>
 	<body>
 		<table id="abilitytable" border=1>
-			<tr>
-				<td colspan=5>Ability Score</td>
-			</tr>
+			<th colspan=5>
+				Ability Score
+			</th>
 			<tr>
 				<td></td>
 				<td>Base Score</td>
@@ -17,42 +102,42 @@
 			</tr>
 			<tr>
 				<td>Strength</td>
-				<td>10</td>
-				<td>+0</td>
+				<td><input type="text" value="12" id="str"></td>
+				<td id="strmod">+0</td>
 				<td>10</td>
 				<td>+0</td>
 			</tr>
 			<tr>
 				<td>Dexterity</td>
-				<td>10</td>
-				<td>+0</td>
+				<td><input type="text" value="10" id="dex"></td>
+				<td id="dexmod">+0</td>
 				<td>10</td>
 				<td>+0</td>
 			</tr>
 			<tr>
 				<td>Constitution</td>
-				<td>10</td>
+				<td><input type="text" value="10" id="con"></td>
 				<td>+0</td>
 				<td>10</td>
 				<td>+0</td>
 			</tr>
 			<tr>
 				<td>Intelligence</td>
-				<td>10</td>
+				<td><input type="text" value="10" id="int"></td>
 				<td>+0</td>
 				<td>10</td>
 				<td>+0</td>
 			</tr>
 			<tr>
 				<td>Wisdom</td>
-				<td>10</td>
+				<td><input type="text" value="10" id="wis"></td>
 				<td>+0</td>
 				<td>10</td>
 				<td>+0</td>
 			</tr>
 			<tr>
 				<td>Charisma</td>
-				<td>10</td>
+				<td><input type="text" value="10" id="cha"></td>
 				<td>+0</td>
 				<td>10</td>
 				<td>+0</td>
@@ -60,54 +145,61 @@
 		</table>
 		<br>
 		<table id="savestable" border=1>
-			<tr>
-				<td colspan=4>Saves</td>
-			</tr>
+			<th colspan=5>
+				Saves
+			</th>
 			<tr>
 				<td></td>
+				<td>Total</td>
 				<td>Modifier</td>
 				<td>Base Save</td>
 				<td>Misc. Mod</td>
 			</tr>
 			<tr>
 				<td>Fortitude</td>
-				<td>+2</td>
-				<td>2</td>
-				<td>0</td>
+				<td id="forttot">+0</td>
+				<td id="fortstr">+2</td>
+				<td id="fortbase">2</td>
+				<td><input type=text value="0" id="fortmisc"></td>
 			</tr>
 			<tr>
 				<td>Reflex</td>
-				<td>+2</td>
+				<td id=refltot">+0</td>
+				<td id="reflexdex">+2</td>
 				<td>2</td>
-				<td>0</td>
+				<td><input type="text" value="0" id="reflmisc"></td>
 			</tr>
 			<tr>
 				<td>Will</td>
+				<td id="willtot">+0</td>
+				<td id="willwis">0</td>
 				<td>0</td>
-				<td>0</td>
-				<td>0</td>
+				<td><input type="text" value="0" id="willmisc"></td>
 			</tr>
 		</table>
 		<br>
 		<table id="babtable" border=1>
 			<tr>
-				<td>Base Attack Bonus</td>
+				<th>Base Attack Bonus</th>
 				<td>0</td>
 			</tr>
 		</table>
 		<br>
 		<table id="cmbtable" border=1>
 			<tr>
-				<td>CMB</td>
+				<th>CMB</th>
 				<td>+0</td>
 			</tr>
 			<tr>
-				<td>CMD</td>
+				<th>CMD</th>
 				<td>10</td>
 			</tr>
 		</table>
 		<br>
 		<table id="weapon1table" border=1>
+			<th colspan=6>
+				Weapons
+			</th>
 			<tr>
 				<td>Weapon Type</td>
 				<td colspan=2>Two-Handed</td>
@@ -202,9 +294,9 @@
 		</table>
 		<br>
 		<table border=1 id="feattable">
-			<tr>
-				<td colspan=2>Feats and Abilities</td>
-			</tr>
+			<th colspan=2>
+				Feats and Abilities
+			</th>
 			<tr>
 				<td>Name</td>
 				<td>Effect</td>
@@ -214,8 +306,11 @@
 				<td></td>
 			</tr>
 		</table>
-
+		<br>
 		<table border=1 id="chartable">
+			<th colspan=8>
+				Character Info
+			</th>
 			<tr>
 				<td>Character Name</td>
 				<td><input type="text" value="Dante Examplehollow"></td>
@@ -268,18 +363,33 @@
 						<option value="helf">Half Elf</option>
 						<option value="horc">Half Orc</option>
 						<option value="half">Halfling</option>
+						<option value="human">Human</option>
 						<option value="kobold">Kobold</option>
 						<option value="tiefling">Tiefling</option>
 				</select></td>
 				<td>Level</td>
-				<td>1</td>
+				<td><div id="level">1</div><input type="button" id="leveldown" value="-"><input type="button" id="levelup" value="+"></td>
 				<td>Size</td>
-				<td>Medium</td>
+				<td><select>
+						<option value="-4">Fine</option>
+						<option value="-3">Diminutive</option>
+						<option value="-2">Tiny</option>
+						<option value="-1">Small</option>
+						<option value="0">Medium</option>
+						<option value="1">Large</option>
+						<option value="2">Huge</option>
+						<option value="3">Gargantuan</option>
+						<option value="4">Colossal</option>
+				</select></td>
 				<td></td>
 				<td><input type="checkbox">Skills Points</td>
 			</tr>
 		</table>
+		<br>
 		<table border=1 id="hptable">
+			<th colspan=4>
+				Hit Points
+			</th>
 			<tr>
 				<td>Hitpoints Max</td>
 				<td>100</td>
@@ -298,22 +408,33 @@
 				<td></td>
 			</tr>
 		</table>
+		<br>
 		<table border=1 id="initiativetable">
+			<th colspan=3>
+				Initiative
+			</th>
 			<tr>
-				<td></td>
+				<td>Total</td>
 				<td>Dex Modifier</td>
 				<td>Misc. Modifier</td>
 			</tr>
 			<tr>
-				<td>Initiative</td>
-				<td>+4</td>
-				<td>0</td>
+				<td id="init">0</td>
+				<td id="initdex">+4</td>
+				<td><input type="text" id="initmisc" value="+0"></td>
 			</tr>
 		</table>
+		<br>
 		<table border=1 id="actable">
+			<th colspan=11>
+				Armor
+			</th>
 			<tr>
-				<td>Armor</td>
+				<td></td>
+				<td></td>
+				<td>Armor Type</td>
 				<td>Armor Enhancement</td>
+				<td>Dex Modifier</td>
 				<td>Shield</td>
 				<td>Shield Enhancement</td>
 				<td>Size Mod</td>
@@ -322,8 +443,11 @@
 				<td>Misc. Mod</td>
 			</tr>
 			<tr>
+				<td>Armor Class (AC)</td>
+				<td>10</td>
 				<td>Studded Leather</td>
 				<td>+2</td>
+				<td id="acdex">+0</td>
 				<td></td>
 				<td>0</td>
 				<td>0</td>
@@ -331,25 +455,38 @@
 				<td>0</td>
 				<td>0</td>
 			</tr>
-		</table>
-		<table border=1 id="speedtable">
 			<tr>
-				<td>Speed</td>
-				<td>30 ft</td>
+				<td>Touch AC</td>
+				<td>10</td>
+			</tr>
+			<tr>
+				<td>Flat Footed AC</td>
+				<td>10</td>
+			</tr>
+		</table>
+		<br>
+		<table id="speedtable">
+			<th colspan=2>
+				Speed
+			</th>
+			<tr>
+				<td>Ground Speed</td>
+				<td><input type="text" value="30 ft"></td>
 			</tr>
 			<tr>
 				<td>Swim Speed</td>
-				<td>0 ft</td>
+				<td><input type="text" value="0 ft"></td>
 			</tr>
 			<tr>
 				<td>Fly Speed</td>
-				<td>0 ft</td>
+				<td><input type="text" value="0 ft"</td>
 			</tr>
 		</table>
+		<br>
 		<table border=1 id="skilltable">
-			<tr>
-				<td colspan=5>Skills</td>
-			</tr>
+			<th colspan=5>
+				Skills
+			</th>
 			<tr>
 				<td>Skill Name</td>
 				<td>Total Bonus</td>
@@ -394,7 +531,7 @@
 			</tr>
 			
 		</table>
-
+		<input type="button" id="save" value="Save">
 
 
 
