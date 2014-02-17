@@ -22,6 +22,10 @@
 			}
 		</style>
 		<script>
+			//stores the class name
+			var cclass;
+			//stores the current size mod
+			var size;
 			$(document).ready(function(){
 				//add localStorage loading here
 
@@ -65,7 +69,7 @@
 				$("#con").change(function(){
 					if($("#con").val() < 9){
 						$("#conmod").text(Math.ceil(($("#con").val()-10)/2));
-						}else{
+					}else{
 						$("#conmod").text("+"+Math.floor(($("#con").val()-10)/2));
 					}
 					$("#fortcon").text($("#conmod").text());
@@ -78,7 +82,7 @@
 				$("#int").change(function(){
 					if($("#int").val() < 9){
 						$("#intmod").text(Math.ceil(($("#int").val()-10)/2));
-						}else{
+					}else{
 						$("#intmod").text("+"+Math.floor(($("#int").val()-10)/2));
 					}
 
@@ -87,7 +91,7 @@
 				$("#wis").change(function(){
 					if($("#wis").val() < 9){
 						$("#wismod").text(Math.ceil(($("#wis").val()-10)/2));
-						}else{
+					}else{
 						$("#wismod").text("+"+Math.floor(($("#wis").val()-10)/2));
 					}
 					$("#willwis").text($("#wismod").text());
@@ -99,10 +103,27 @@
 				$("#cha").change(function(){
 					if($("#cha").val() < 9){
 						$("#chamod").text(Math.ceil(($("#cha").val()-10)/2));
-						}else{
+					}else{
 						$("#chamod").text("+"+Math.floor(($("#cha").val()-10)/2));
 					}
 
+				});
+
+				//Update the class
+				$("#classSelect").change(function(){
+					cclass =  $("#classSelect").find(":selected").val();
+					updateFort();
+					updateRefl();
+					updateWill();
+				});
+
+				//update size
+				$("#size").change(function(){
+					size = $("#size").find(":selected").val();
+					$("#acsize").text(size);
+					updateAC();
+					//update AC, weapons
+					//str and dex?
 				});
 
 				//update initiative if misc modifier is changed
@@ -120,17 +141,109 @@
 				$("#willmisc").change(function(){
 					updateWill();
 				});
+				$("#acmisc").change(function(){
+					updateAC();
+				});
+
+				$("#levelup").click(function(){
+					//increase the level
+					$("#level").text(Number($("#level").text())+1);
+					//change the fort base save
+					switch(cclass){
+						case "rogue":
+						case "wiz":
+						case "sorc":
+						case "ninja":
+						case "summ":
+						case "witch":
+						case "oracle":
+						$("#fortbase").text(Math.floor(Number($("#level").text())/3));
+						break;
+						default:
+						$("#fortbase").text(Math.floor(Number($("#level").text())/2 + 2));
+						break;
+					}
+					updateFort();
+					switch(cclass){
+						case "ranger":
+						case "ninja":
+						case "rogue":
+						case "alch":
+						case "gun":
+						case "bard":
+						$("#reflbase").text(Math.floor(Number($("#level").text())/2 + 2));
+						break;
+						default:
+						$("#reflbase").text(Math.floor(Number($("#level").text())/3));
+						break;
+					}
+					updateRefl();
+					switch(cclass){
+						case "monk":
+						case "bard":
+						case "cleric":
+						case "druid":
+						case "paladin":
+						case "apal":
+						case "inq":
+						case "magus":
+						case "wiz":
+						case "oracle":
+						case "summ":
+						case "witch":
+						case "sorc":
+						$("#willbase").text(Math.floor(Number($("#level").text())/2+2));
+						break;
+						default:
+						$("#willbase").text(Math.floor(Number($("#level").text())/3));
+						break;
+					}
+					updateWill();
+					//update BAB
+					switch(cclass){
+					case "fight":
+					case "paladin":
+					case "barb":
+					case "ranger":
+					case "apal":
+					case "samurai":
+					case "cav":
+					case "gun":
+						$("#bab").text($("#level").text());
+						break;
+					case "wiz":
+					case "witch":
+					case "sorc":
+						$("#bab").text(Math.floor(Number($("#level").text())/2));
+						break;
+					default:
+						$("#bab").text(Math.floor(Number($("#level").text())*0.75));
+						break;
+					}
+					//CMB is bab + strmod + sizemod
+					$("#cmb").text(Number($("#bab").text())+Number($("#strmod").text())+size);
+					//cmd is cmb + dexmod + 10
+					$("#cmd").text(Number($("#cmb").text())+Number($("#dexmod").text())+10);
 
 
-				//call all change methods to update the blank sheet so page refreshes don't kill it
+				});
+				//call all change methods to update the blank sheet so page refreshes dont kill it
+				$("#classSelect").change();
+				$("#size").change();
+
+				$("#cha").change();
 				$("#str").change();
 				$("#dex").change();
 				$("#con").change();
 				$("#int").change();
 				$("#wis").change();
-				$("#cha").change();
 				$("#initmisc").change();
+				$("#classSelect").change();
 			});
+
+			//TODO move level update to functions
+			//TODO move base save updates to functions
+			//TODO add global update function
 
 			//Updates the total initiative 
 			function updateInit(){
@@ -140,14 +253,25 @@
 			//updates fort save
 			function updateFort(){
 				$("#forttot").text(Number($("#fortcon").text())+Number($("#fortbase").text())+Number($("#fortmisc").val()));
+				if(cclass == "paladin" || cclass == "apal"){
+					$("#forttot").text(Number($("#forttot").text())+Number($("#chamod").text()));
+				}
 			}
 
 			function updateRefl(){
 				$("#refltot").text(Number($("#reflexdex").text())+Number($("#reflbase").text())+Number($("#reflmisc").val()));
+				if(cclass == "paladin" || cclass == "apal"){
+					$("#refltot").text(Number($("#refltot").text())+Number($("#chamod").text()));
+				}
+		
 			}
 			
 			function updateWill(){
 				$("#willtot").text(Number($("#willwis").text())+Number($("#willbase").text())+Number($("#willmisc").val()));
+				if(cclass == "paladin" || cclass == "apal"){
+					$("#willtot").text(Number($("#willtot").text())+Number($("#chamod").text()));
+				}
+		
 			}
 
 			function updateAC(){
@@ -249,23 +373,23 @@
 		<table id="babtable" border=1>
 			<tr>
 				<th>Base Attack Bonus</th>
-				<td>0</td>
+				<td id="bab">0</td>
 			</tr>
 		</table>
 		<br>
 		<table id="cmbtable" border=1>
 			<tr>
 				<th>CMB</th>
-				<td>+0</td>
+				<td id="cmb">+0</td>
 			</tr>
 			<tr>
 				<th>CMD</th>
-				<td>10</td>
+				<td id="cmd">10</td>
 			</tr>
 		</table>
 		<br>
-		<table id="weapon1table" border=1>
-			<th colspan=6>
+		<table id="weapon1table"> 
+			<th colspan=7>
 				Weapons
 			</th>
 			<tr>
@@ -274,9 +398,11 @@
 				<td>Attack Bonus</td>
 				<td>Enhancement Bonus</td>
 				<td>Misc. Bonus</td>
+				<td><input type="checkbox" id="powerattack1">Power Attack</td>
 			</tr>
 			<tr>
 				<td colspan=3>Falchion</td>
+				<!-- bab + str mod + size mod-->
 				<td>+0</td>
 				<td>0</td>
 				<td>0</td>
@@ -298,7 +424,7 @@
 				<td>0</td>
 			</tr>
 		</table>
-		<table id="weapon2table" border=1>
+		<table id="weapon2table">
 			<tr>
 				<td>Weapon Type</td>
 				<td colspan=2>Two-Handed</td>
@@ -329,7 +455,7 @@
 				<td>0</td>
 			</tr>
 		</table>
-		<table id="weapon3table" border=1>
+		<table id="weapon3table"> 
 			<tr>
 				<td>Weapon Type</td>
 				<td colspan=2>Two-Handed</td>
@@ -361,7 +487,7 @@
 			</tr>
 		</table>
 		<br>
-		<table border=1 id="feattable">
+		<table id="feattable">
 			<th colspan=2>
 				Feats and Abilities
 			</th>
@@ -375,7 +501,7 @@
 			</tr>
 		</table>
 		<br>
-		<table border=1 id="chartable">
+		<table id="chartable">
 			<th colspan=8>
 				Character Info
 			</th>
@@ -383,7 +509,7 @@
 				<td>Character Name</td>
 				<td><input type="text" value="Dante Examplehollow"></td>
 				<td>Class</td>
-				<td><select>
+				<td><select id="classSelect">
 						<option value="alch">Alchemist</option>
 						<option value="apal">Antipaladin</option>
 						<option value="barb">Barbarian</option>
@@ -438,16 +564,16 @@
 				<td>Level</td>
 				<td><div id="level">1</div><input type="button" id="leveldown" value="-"><input type="button" id="levelup" value="+"></td>
 				<td>Size</td>
-				<td><select>
-						<option value="-4">Fine</option>
-						<option value="-3">Diminutive</option>
-						<option value="-2">Tiny</option>
-						<option value="-1">Small</option>
-						<option value="0">Medium</option>
-						<option value="1">Large</option>
-						<option value="2">Huge</option>
-						<option value="3">Gargantuan</option>
-						<option value="4">Colossal</option>
+				<td><select id="size">
+						<option value=-8>Fine</option>
+						<option value=-4>Diminutive</option>
+						<option value=-2>Tiny</option>
+						<option value=-1>Small</option>
+						<option value=0>Medium</option>
+						<option value=1>Large</option>
+						<option value=2>Huge</option>
+						<option value=4>Gargantuan</option>
+						<option value=8>Colossal</option>
 				</select></td>
 				<td></td>
 				<td><input type="checkbox">Skills Points</td>
