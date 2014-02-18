@@ -31,23 +31,13 @@
 
 				//handles ability modifiers
 				$("#str").change(function(){
-					if($("#str").val() < 9){
-						//round up
-						$("#strmod").text(Math.ceil(($("#str").val()-10)/2));
-					}else{
-						//round down
-						$("#strmod").text("+"+Math.floor(($("#str").val()-10)/2));
-					}
+                                        $("#strmod").text(getMod($("#str").val()));
 
 					//update weapon stuff
 				});
 
 				$("#dex").change(function(){
-					if($("#dex").val() < 9){
-						$("#dexmod").text(Math.ceil(($("#dex").val()-10)/2));
-					}else{
-						$("#dexmod").text("+"+Math.floor(($("#dex").val()-10)/2));
-					}
+                                        $("#dexmod").text(getMod($("#dex").val()));
 					//set the dex modifiers on other stats
 					$("#initdex").text($("#dexmod").text());
 					$("#reflexdex").text($("#dexmod").text());
@@ -67,11 +57,7 @@
 				});
 
 				$("#con").change(function(){
-					if($("#con").val() < 9){
-						$("#conmod").text(Math.ceil(($("#con").val()-10)/2));
-					}else{
-						$("#conmod").text("+"+Math.floor(($("#con").val()-10)/2));
-					}
+                                        $("#conmod").text(getMod($("#con").val()));
 					$("#fortcon").text($("#conmod").text());
 
 					//update hp?
@@ -80,20 +66,12 @@
 				});
 
 				$("#int").change(function(){
-					if($("#int").val() < 9){
-						$("#intmod").text(Math.ceil(($("#int").val()-10)/2));
-					}else{
-						$("#intmod").text("+"+Math.floor(($("#int").val()-10)/2));
-					}
-
+                                  $("#intmod").text(getMod($("#int").val()));
 				});
 
 				$("#wis").change(function(){
-					if($("#wis").val() < 9){
-						$("#wismod").text(Math.ceil(($("#wis").val()-10)/2));
-					}else{
-						$("#wismod").text("+"+Math.floor(($("#wis").val()-10)/2));
-					}
+                                        $("#wismod").text(getMod($("#wis").val()));
+
 					$("#willwis").text($("#wismod").text());
 
 					//update will save
@@ -101,29 +79,35 @@
 				});
 
 				$("#cha").change(function(){
-					if($("#cha").val() < 9){
-						$("#chamod").text(Math.ceil(($("#cha").val()-10)/2));
-					}else{
-						$("#chamod").text("+"+Math.floor(($("#cha").val()-10)/2));
-					}
-
+                                        $("#chamod").text(getMod($("#cha").val()));
+                                        //calls update saves in case the class is paladin
+                                        updateFort();
+                                        updateWill();
+                                        updateRefl();
 				});
 
 				//Update the class
 				$("#classSelect").change(function(){
 					cclass =  $("#classSelect").find(":selected").val();
-					updateFort();
-					updateRefl();
-					updateWill();
+                                       changeAll();
 				});
 
 				//update size
 				$("#size").change(function(){
+                                    //also store last size, so we know how to go back
 					size = $("#size").find(":selected").val();
 					$("#acsize").text(size);
 					updateAC();
 					//update AC, weapons
 					//str and dex?
+					//each size down gains +2 dex, -2 str, +1 ac, +1 attack roll - opposite for large
+					//so set medium =0, small = 1, large = -1 so we can just math the stuff
+					$("#dex").val(Number($("#dex").val())+(Number(size)*2));
+					$("#str").val(Number($("#str").val())+(-2*Number(size)));
+                                        //cmb and cmd get bonus for this too
+
+					//still need attack roll
+					
 				});
 
 				//update initiative if misc modifier is changed
@@ -145,105 +129,143 @@
 					updateAC();
 				});
 
+				//need to change this to a function that takes a level number
 				$("#levelup").click(function(){
 					//increase the level
 					$("#level").text(Number($("#level").text())+1);
-					//change the fort base save
-					switch(cclass){
-						case "rogue":
-						case "wiz":
-						case "sorc":
-						case "ninja":
-						case "summ":
-						case "witch":
-						case "oracle":
-						$("#fortbase").text(Math.floor(Number($("#level").text())/3));
-						break;
-						default:
-						$("#fortbase").text(Math.floor(Number($("#level").text())/2 + 2));
-						break;
-					}
-					updateFort();
-					switch(cclass){
-						case "ranger":
-						case "ninja":
-						case "rogue":
-						case "alch":
-						case "gun":
-						case "bard":
-						$("#reflbase").text(Math.floor(Number($("#level").text())/2 + 2));
-						break;
-						default:
-						$("#reflbase").text(Math.floor(Number($("#level").text())/3));
-						break;
-					}
-					updateRefl();
-					switch(cclass){
-						case "monk":
-						case "bard":
-						case "cleric":
-						case "druid":
-						case "paladin":
-						case "apal":
-						case "inq":
-						case "magus":
-						case "wiz":
-						case "oracle":
-						case "summ":
-						case "witch":
-						case "sorc":
-						$("#willbase").text(Math.floor(Number($("#level").text())/2+2));
-						break;
-						default:
-						$("#willbase").text(Math.floor(Number($("#level").text())/3));
-						break;
-					}
-					updateWill();
-					//update BAB
-					switch(cclass){
-					case "fight":
-					case "paladin":
-					case "barb":
-					case "ranger":
-					case "apal":
-					case "samurai":
-					case "cav":
-					case "gun":
-						$("#bab").text($("#level").text());
-						break;
-					case "wiz":
-					case "witch":
-					case "sorc":
-						$("#bab").text(Math.floor(Number($("#level").text())/2));
-						break;
-					default:
-						$("#bab").text(Math.floor(Number($("#level").text())*0.75));
-						break;
-					}
-					//CMB is bab + strmod + sizemod
-					$("#cmb").text(Number($("#bab").text())+Number($("#strmod").text())+size);
-					//cmd is cmb + dexmod + 10
-					$("#cmd").text(Number($("#cmb").text())+Number($("#dexmod").text())+10);
+                                        changeAll();
+
+	    			});
+
+                                $("#leveldown").click(function(){
+                                 //decrease level
+                                    if(Number($("#level").text())>0){
+                                       $("#level").text(Number($("#level").text())-1);
+                                       changeAll();
+                                    }
+                                 });
 
 
-				});
 				//call all change methods to update the blank sheet so page refreshes dont kill it
-				$("#classSelect").change();
-				$("#size").change();
-
-				$("#cha").change();
-				$("#str").change();
-				$("#dex").change();
-				$("#con").change();
-				$("#int").change();
-				$("#wis").change();
-				$("#initmisc").change();
-				$("#classSelect").change();
+				changeAll();
 			});
 
 			//TODO move level update to functions
 			//TODO move base save updates to functions
 			//TODO add global update function
+
+                        //updates all fields on page in a logical order
+			function changeAll(){
+                        
+                                //chnage this over to use changeAll() sometime
+				$("#size").change();
+
+                               //can't just call class.change because infiinite loop
+                               cclass =  $("#classSelect").find(":selected").val();
+				$("#cha").change();
+				$("#str").change();
+
+                               //setlevel relys on strmod and size
+                               setLevel(Number($("#level").text()));
+				$("#dex").change();
+				$("#con").change();
+				$("#int").change();
+				$("#wis").change();
+				$("#initmisc").change();
+				
+			}
+
+
+                        //gets the modifer for the given score
+                        function getMod(val){
+                           if(val < 10){
+                              //floor acts like ceiling for negative numbers
+                             return Math.floor((val-10)/2);
+                           }else{
+                             return "+"+Math.floor((val-10)/2);
+                           }
+                        }
+
+                        function setLevel(level){
+                             //change the fort base save
+                            switch(cclass){
+                                    case "rogue":
+                                    case "wiz":
+                                    case "sorc":
+                                    case "ninja":
+                                    case "summ":
+                                    case "witch":
+                                    case "oracle":
+                                       $("#fortbase").text(Math.floor(level/3));
+                                    break;
+                                    default:
+                                       $("#fortbase").text(Math.floor(level/2 + 2));
+                                    break;
+                            }
+                            switch(cclass){
+                                    case "ranger":
+                                    case "ninja":
+                                    case "rogue":
+                                    case "alch":
+                                    case "gun":
+                                    case "bard":
+                                       $("#reflbase").text(Math.floor(level/2 + 2));
+                                       break;
+                                    default:
+                                       $("#reflbase").text(Math.floor(level/3));
+                                       break;
+                            }
+                            switch(cclass){
+                                    case "monk":
+                                    case "bard":
+                                    case "cleric":
+                                    case "druid":
+                                    case "paladin":
+                                    case "apal":
+                                    case "inq":
+                                    case "magus":
+                                    case "wiz":
+                                    case "oracle":
+                                    case "summ":
+                                    case "witch":
+                                    case "sorc":
+                                       $("#willbase").text(Math.floor(level/2+2));
+                                       break;
+                                    default:
+                                       $("#willbase").text(Math.floor(level/3));
+                                       break;
+                            }
+                            //update BAB
+                            switch(cclass){
+                            case "fight":
+                            case "paladin":
+                            case "barb":
+                            case "ranger":
+                            case "apal":
+                            case "samurai":
+                            case "cav":
+                            case "gun":
+                                    $("#bab").text(level);
+                                    break;
+                            case "wiz":
+                            case "witch":
+                            case "sorc":
+                                    $("#bab").text(Math.floor(level/2));
+                                    break;
+                            default:
+                                    $("#bab").text(Math.floor(level*0.75));
+                                    break;
+                            }
+                            //CMB is bab + strmod + sizemod
+                            //need to handle size special? rest of the sheet assumes that its an enlarge person spell and not beastiary rules
+                            //add a "+" if pos, leave alone if neg
+                            $("#cmb").text(Number($("#bab").text())+Number($("#strmod").text())+Number(size));
+                            //cmd is cmb + dexmod + 10
+                            $("#cmd").text(Number($("#cmb").text())+Number($("#dexmod").text())+10);
+                           }
+
+
+
 
 			//Updates the total initiative 
 			function updateInit(){
@@ -296,43 +318,43 @@
 				<td>Strength</td>
 				<td><input type="text" value="12" id="str"></td>
 				<td id="strmod">+0</td>
-				<td>10</td>
-				<td>+0</td>
+				<td id="stcur">10</td>
+				<td id="strcurmod">+0</td>
 			</tr>
 			<tr>
 				<td>Dexterity</td>
 				<td><input type="text" value="10" id="dex"></td>
 				<td id="dexmod">+0</td>
-				<td>10</td>
-				<td>+0</td>
+				<td id="dexcur">10</td>
+				<td id="dexcurmod">+0</td>
 			</tr>
 			<tr>
 				<td>Constitution</td>
 				<td><input type="text" value="10" id="con"></td>
 				<td id="conmod">+0</td>
-				<td>10</td>
-				<td>+0</td>
+				<td id="concur">10</td>
+				<td id="concurmod">+0</td>
 			</tr>
 			<tr>
 				<td>Intelligence</td>
 				<td><input type="text" value="10" id="int"></td>
 				<td id="intmod">+0</td>
-				<td>10</td>
-				<td>+0</td>
+				<td id="intcur">10</td>
+				<td id="intcurmod">+0</td>
 			</tr>
 			<tr>
 				<td>Wisdom</td>
 				<td><input type="text" value="10" id="wis"></td>
 				<td id="wismod">+0</td>
-				<td>10</td>
-				<td>+0</td>
+				<td id="wiscur">10</td>
+				<td id="wiscurmod">+0</td>
 			</tr>
 			<tr>
 				<td>Charisma</td>
 				<td><input type="text" value="10" id="cha"></td>
 				<td id="chamod">+0</td>
-				<td>10</td>
-				<td>+0</td>
+				<td id="chacur">10</td>
+				<td id="chacurmod">+0</td>
 			</tr>
 		</table>
 		<br>
@@ -565,15 +587,15 @@
 				<td><div id="level">1</div><input type="button" id="leveldown" value="-"><input type="button" id="levelup" value="+"></td>
 				<td>Size</td>
 				<td><select id="size">
-						<option value=-8>Fine</option>
-						<option value=-4>Diminutive</option>
-						<option value=-2>Tiny</option>
-						<option value=-1>Small</option>
-						<option value=0>Medium</option>
-						<option value=1>Large</option>
-						<option value=2>Huge</option>
-						<option value=4>Gargantuan</option>
-						<option value=8>Colossal</option>
+						<option value=4>Fine</option>
+						<option value=3>Diminutive</option>
+						<option value=2>Tiny</option>
+						<option value=1>Small</option>
+						<option selected="selected" value=0>Medium</option>
+						<option value=-1>Large</option>
+						<option value=-2>Huge</option>
+						<option value=-3>Gargantuan</option>
+						<option value=-4>Colossal</option>
 				</select></td>
 				<td></td>
 				<td><input type="checkbox">Skills Points</td>
@@ -725,6 +747,101 @@
 			</tr>
 			
 		</table>
+                <table id="spells0">
+                   <th colspan=4>
+                     Spells Level 0
+                  </th>
+                  <tr>
+                     <td>Spell DC</td>
+                     <td>0</td>
+                     <td>Spells per Day</td>
+                     <td>0</td>
+                  </tr>
+                  <tr>
+                     <td colspan=2>Spell Name</td>
+                     <td colspan=2>Spell Effect</td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+               </table>
+                <table id="spells1">
+                   <th colspan=4>
+                     Spells Level 1
+                  </th>
+                  <tr>
+                     <td>Spell DC</td>
+                     <td>0</td>
+                     <td>Spells per Day</td>
+                     <td>0</td>
+                  </tr>
+                  <tr>
+                     <td colspan=2>Spell Name</td>
+                     <td colspan=2>Spell Effect</td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+                  <tr>
+                     <td colspan=2></td>
+                     <td colspan=2></td>
+                  </tr>
+               </table>
+
+
+
+
+
+
+
+
+
 		<input type="button" id="save" value="Save">
 
 
